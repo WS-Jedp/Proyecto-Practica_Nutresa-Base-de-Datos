@@ -57,13 +57,18 @@ class productoController extends Controller
         $cliente = modelClient::findOrFail($request->cliente_id);
         $inventario = modelInventario::findOrfail($producto->id);
         $usuario = auth()->user();
-        $dateTime = [now()];
+        $dateTime = now();
 
         $descuento = modelClient::select('tbl_clientes.marca','categorias_clientes.categoria', 'descuento_producto.valor')
         ->join('categorias_clientes','categorias_clientes.id', '=', 'tbl_clientes.categorias_clientes_id')
         ->join('descuento_producto', 'descuento_producto.id', '=', 'categorias_clientes.descuento_producto_id')
         ->where('tbl_clientes.id', $cliente->id)
         ->get();
+
+        $categoriaCliente = modelClient::select('tbl_clientes.*', 'categorias_clientes.*')
+        ->join('categorias_clientes', 'categorias_clientes.id', '=', 'tbl_clientes.categorias_clientes_id')
+        ->where('tbl_clientes.categorias_clientes_id', $cliente->id )
+        ->first();
 
         
         //Descuentos
@@ -80,9 +85,13 @@ class productoController extends Controller
                 $combo->precioNormal = $precioFinal;
             $combo->precioCombo = $request->precioCombo;
 
+            $combo->save();
+
             //registrar Combo
             $registroCombo->tbl_productos_id = $producto->id;
             $registroCombo->combos_id = $combo->id;
+
+            $registroCombo->save();
 
         }    
 
@@ -93,25 +102,29 @@ class productoController extends Controller
         $newFactura_compra->descuento = $descuento[0]->valor;
             //Descuento
         $newFactura_compra->precio_final = $precioFinal;
+        $newFactura_compra->fecha = $dateTime;
             //Factura Combo
         if($request->tipo_factura == 0){
             $newFactura_compra->registro_combos_id = $registroCombo->id;
         } else{
-            $newFactura_compra->regristro_combos_id = null;
+            $newFactura_compra->registro_combos_id = null;
         }
-        
-        $newFactura_compra->tbl_producto_id = $producto->id;
+        $newFactura_compra->tbl_productos_id = $producto->id;
+        $newFactura_compra->save();
 
         //Registro Facturas - Clientes
         $newRegistroCompra->tbl_clientes_id = $cliente->id;
-        $newRegistroCompra->factura_compra_id = $newFactura_compra->id; 
+        $newRegistroCompra->factura_compra_id = $newFactura_compra->id;
+        $newRegistroCompra->save(); 
 
         //Registro Facturas - Usuario
         $newRegistroFactura->factura_compra_id = $newFactura_compra->id;
         $newRegistroFactura->tbl_usuario_id = $usuario->id;
+        $newRegistroFactura->save();
 
         //Inventario
         $inventario->cantidad = $inventario->cantidad - $request->cantidad;
+        $inventario->save();
 
 
         //Factura Combo
@@ -124,13 +137,13 @@ class productoController extends Controller
         if($request->tipo_factura != 0){
 
             return response()->json([
-                'Producto' => $producto,
-                'Cliente' => $cliente,
-                'Usuario' => $usuario,
-                'Inventario' => $inventario,
-                'Factura'=> $newFactura_compra,
-                'Registro Compra'=>$newRegistroCompra,  
-                'Descuento' => $descuento[0]->valor,
+
+                'mensaje' => 'La compra se ha realizado correctamente',
+                'descripcion' => 'El cliente ' . $cliente->marca . ' ha comprado ' . $request->cantidad . ' producto(s) de ' . $producto->nombre, 
+                'precio' => 'El precio del producto ' . $producto->nombre . ' es ' . $producto->precio . ', se le agrega un descuento del ' . $descuento[0]->valor . '% por ser cliente ' . $categoriaCliente->categoria,
+                'registro de compra' => 'Se ha registrado la compra con el nuemero ' . $newRegistroCompra->id . ', en el dia ' . $dateTime,
+                'precio total' => 'El valor total a pagar es ' . $precioFinal,
+                'status' => '200'
                 
             ]);    
            

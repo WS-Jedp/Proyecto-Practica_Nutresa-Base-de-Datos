@@ -29,7 +29,7 @@ class CreateFacturaCompraTable extends Migration
             $table->integer('descuento')->nullable();
             $table->integer('precio_final')->nullable();
             $table->date('fecha')->nullable();
-            $table->integer('registro_combos_id');
+            $table->integer('registro_combos_id')->nullable();
             $table->integer('tbl_productos_id');
 
             $table->index(["registro_combos_id"], 'fk_factura_compra_registro_combos1_idx');
