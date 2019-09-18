@@ -40,4 +40,7 @@ Route::group(['middleware'=>'jwt.auth'], function(){
         //Comprar productos
     Route::post('comprarProductos', 'productosControllers\productoController@comprarProducto');
 
+        //Registrar Combo
+    Route::post('registrarCombo', 'productosControllers\productoController@registrarCombo');
+
 });

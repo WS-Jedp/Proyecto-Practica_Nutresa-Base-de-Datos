@@ -28,6 +28,15 @@ class CreateCombosTable extends Migration
             $table->integer('cantidad')->nullable();
             $table->integer('valor')->nullable();
             $table->integer('valor_final')->nullable();
+            $table->integer('registros_combos_id');
+
+            $table->index(["registros_combos_id"], 'fk_combos_registros_combos1_idx');
+
+
+            $table->foreign('registros_combos_id', 'fk_combos_registros_combos1_idx')
+                ->references('id')->on('registros_combos')
+                ->onDelete('no action')
+                ->onUpdate('no action');
         });
     }
 

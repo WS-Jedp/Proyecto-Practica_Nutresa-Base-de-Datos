@@ -25,21 +25,21 @@ class CreateRegistrosCombosTable extends Migration
             $table->increments('id');
             $table->string('nombre', 45)->nullable();
             $table->mediumText('descripcion')->nullable();
-            $table->integer('registro_combos_id');
             $table->integer('tbl_productos_id');
+            $table->integer('factura_compra_id');
 
             $table->index(["tbl_productos_id"], 'fk_registro_combos_has_tbl_productos_tbl_productos1_idx');
 
-            $table->index(["registro_combos_id"], 'fk_registro_combos_has_tbl_productos_registro_combos1_idx');
+            $table->index(["factura_compra_id"], 'fk_registros_combos_factura_compra1_idx');
 
-
-            $table->foreign('registro_combos_id', 'fk_registro_combos_has_tbl_productos_registro_combos1_idx')
-                ->references('id')->on('combos')
-                ->onDelete('no action')
-                ->onUpdate('no action');
 
             $table->foreign('tbl_productos_id', 'fk_registro_combos_has_tbl_productos_tbl_productos1_idx')
                 ->references('id')->on('tbl_productos')
+                ->onDelete('no action')
+                ->onUpdate('no action');
+
+            $table->foreign('factura_compra_id', 'fk_registros_combos_factura_compra1_idx')
+                ->references('id')->on('factura_compra')
                 ->onDelete('no action')
                 ->onUpdate('no action');
         });

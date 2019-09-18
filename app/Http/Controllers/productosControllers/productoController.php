@@ -11,8 +11,10 @@ use App\modelos\Clientes\modelClient;
 use App\modelos\Clientes\modelCategoriesClient;
 use App\modelos\registros\modelRegistro_factura;
 use App\modelos\registros\modelRegistro_compra;
+use App\modelos\registros\modelRegistro_combos;
 use App\modelos\facturas\modelFactura_compra;
-
+use App\modelos\combos\modelCombos;
+    
 
 
 class productoController extends Controller
@@ -42,15 +44,26 @@ class productoController extends Controller
         
     }
 
+    //---------------------- Comprar Producto -------------------------------
+
     public function comprarProducto(Request $request){
         $newRegistroCompra = new modelRegistro_compra;
         $newRegistroFactura = new modelRegistro_factura;
         $newFactura_compra = new modelFactura_compra;
-        // $updateInventario = modelInventario::findOrFail();
+        $registroCombo = new modelRegistro_combos;
+        $combo = new modelCombos;
 
         $producto = modelProducto::findOrFail($request->producto_id);
         $cliente = modelClient::findOrFail($request->cliente_id);
+        $inventario = modelInventario::findOrfail($producto->id);
         $usuario = auth()->user();
+        $dateTime = [now()];
+
+        $descuento = modelClient::select('tbl_clientes.marca','categorias_clientes.categoria', 'descuento_producto.valor')
+        ->join('categorias_clientes','categorias_clientes.id', '=', 'tbl_clientes.categorias_clientes_id')
+        ->join('descuento_producto', 'descuento_producto.id', '=', 'categorias_clientes.descuento_producto_id')
+        ->where('tbl_clientes.id', $cliente->id)
+        ->get();
 
         //Registro compra
         $newRegistroCompra->tbl_clientes_id = $cliente->id;
@@ -58,13 +71,77 @@ class productoController extends Controller
 
         //Registro Facturas
         $newRegistroFactura->nombre = $request->nombreFactura;
-        $newRegistroFactura->fecha;
+        $newRegistroFactura->fecha = $dateTime;
+        $newRegistroFactura->cliente_id = $cliente->id;
+        $newRegistroFactura->usuario_id = $usuario->id;
+
+        //Factura Compra
+        $newFactura_compra->nombre = $producto->nombre;
+        $newFactura_compra->cantidad = $request->cantidad;
+        $newFactura_compra->precio = $producto->precio;
+        $newFactura_compra->descuento = $descuento[0]->valor;
+            //Descuento
+            $precioDescuento = $descuento[0]->valor * $producto->precio / 100;
+            $precioFinal = ($producto->precio - $precioDescuento) * $request->cantidad;
+        $newFactura_compra->precio_final = $precioFinal;
+        $newFactura_compra->registro_facturas_id = $newRegistroFactura->id;
+        $newFactura_compra->registro_compra_id = $newRegistroCompra->id;
+
+        //Inventario
+        $inventario->cantidad = $inventario->cantidad - $request->cantidad;
+
+        //Combo
+            //registrar Combo
+        $registroCombo->nombre = $request->nomrbeCombo;
+        $registroCombo->descripcion = $request->descripcionCombo;
+        $registroCombo->tbl_productos_id = $producto->id;
+        $registroCombo->factura_compra_id = $newFactura_compra->id;
+
+            //Especificar Combo
+        $combo->nombre = $request->nomrbeCombo;
+        $combo->descripcion = $request->descripcionCombo;
+        $combo->cantidad = $request->cantidad;
+        $combo->valor = $producto->precio;
+        $combo->valor_final = $request->valorFinalCombo;
+        $combo->registros_combos_id = $registroCombo->id;
 
         return response()->json([
             'Producto' => $producto,
             'Cliente' => $cliente,
             'Usuario' => $usuario,
-            'Registro Compra'=>$newRegistroCompra
+            'Inventario' => $inventario,
+            'Factura'=> $newFactura_compra,
+            'Registro Compra'=>$newRegistroCompra,  
+            'Descuento' => $descuento[0]->valor
         ]);
+    }
+
+    // -------- registrar Combo
+    public function registrarCombo(Request $request){
+        $newRegistroCompra = new modelRegistro_compra;
+        $newRegistroFactura = new modelRegistro_factura;
+        $newFactura_compra = new modelFactura_compra;
+        $registroCombo = new modelRegistro_combos;
+        $combo = new modelCombos;
+        
+
+        $producto = modelProducto::findOrFail($request->producto_id);
+        $cliente = modelClient::findOrFail($request->cliente_id);
+        $inventario = modelInventario::findOrfail($producto->id);
+        $usuario = auth()->user();
+        $dateTime = [now()];
+
+        $descuento = modelClient::select('tbl_clientes.*', 'categorias_clientes.*', 'descuento_producto.*')
+        ->join('categorias_clientes', 'categorias_clientes.id', '=', 'tbl_clientes.categorias_clientes_id')
+        ->join('descuento_producto', 'descuento_producto.id', '=', 'categorias_clientes.descuento_producto_id')
+        ->where('tbl_clientes.id', $cliente->id)
+        ->get();
+
+            
+
+        return response()->json([
+            'Descuento'=> $descuento[0]
+        ]);
+
     }
 }
