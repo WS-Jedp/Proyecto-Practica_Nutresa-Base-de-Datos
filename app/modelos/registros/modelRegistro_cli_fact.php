@@ -4,13 +4,11 @@ namespace App\modelos\registros;
 
 use Illuminate\Database\Eloquent\Model;
 
-class modelRegistro_compra extends Model
+class modelRegistro_cli_fact extends Model
 {
     public $timestamps = false;
-
-    protected $table = 'registro_compra';
-
+    protected $table = 'registros_clientes_facturas';   
     protected $fillable = [
-        'tbl_clientes_id','tbl_productos_id'
+        'factura_compra_id', 'tbl_clientes'
     ];
 }

@@ -9,8 +9,8 @@ use App\modelos\Productos\modelInventario;
 use App\modelos\Productos\modelProducto;
 use App\modelos\Clientes\modelClient;
 use App\modelos\Clientes\modelCategoriesClient;
+use App\modelos\registros\modelRegistro_cli_fact;
 use App\modelos\registros\modelRegistro_factura;
-use App\modelos\registros\modelRegistro_compra;
 use App\modelos\registros\modelRegistro_combos;
 use App\modelos\facturas\modelFactura_compra;
 use App\modelos\combos\modelCombos;
@@ -47,7 +47,7 @@ class productoController extends Controller
     //---------------------- Comprar Producto -------------------------------
 
     public function comprarProducto(Request $request){
-        $newRegistroCompra = new modelRegistro_compra;
+        $newRegistroCompra = new modelRegistro_cli_fact;
         $newRegistroFactura = new modelRegistro_factura;
         $newFactura_compra = new modelFactura_compra;
         $registroCombo = new modelRegistro_combos;
@@ -65,83 +65,86 @@ class productoController extends Controller
         ->where('tbl_clientes.id', $cliente->id)
         ->get();
 
-        //Registro compra
-        $newRegistroCompra->tbl_clientes_id = $cliente->id;
-        $newRegistroCompra->tbl_productos_id = $producto->id; 
+        
+        //Descuentos
+        $precioDescuento = $descuento[0]->valor * $producto->precio / 100;
+        $precioFinal = ($producto->precio - $precioDescuento) * $request->cantidad;
 
-        //Registro Facturas
-        $newRegistroFactura->nombre = $request->nombreFactura;
-        $newRegistroFactura->fecha = $dateTime;
-        $newRegistroFactura->cliente_id = $cliente->id;
-        $newRegistroFactura->usuario_id = $usuario->id;
+
+        //Combo
+        if($request->tipo_factura == 0){
+                //Especificar Combo
+            $combo->nombre = $request->nombreCombo;
+            $combo->descripcion = $request->descripcionCombo;
+            $combo->cantidad = $request->cantidad;
+                $combo->precioNormal = $precioFinal;
+            $combo->precioCombo = $request->precioCombo;
+
+            //registrar Combo
+            $registroCombo->tbl_productos_id = $producto->id;
+            $registroCombo->combos_id = $combo->id;
+
+        }    
 
         //Factura Compra
-        $newFactura_compra->nombre = $producto->nombre;
+        $newFactura_compra->producto = $producto->nombre;
         $newFactura_compra->cantidad = $request->cantidad;
         $newFactura_compra->precio = $producto->precio;
         $newFactura_compra->descuento = $descuento[0]->valor;
             //Descuento
-            $precioDescuento = $descuento[0]->valor * $producto->precio / 100;
-            $precioFinal = ($producto->precio - $precioDescuento) * $request->cantidad;
         $newFactura_compra->precio_final = $precioFinal;
-        $newFactura_compra->registro_facturas_id = $newRegistroFactura->id;
-        $newFactura_compra->registro_compra_id = $newRegistroCompra->id;
+            //Factura Combo
+        if($request->tipo_factura == 0){
+            $newFactura_compra->registro_combos_id = $registroCombo->id;
+        } else{
+            $newFactura_compra->regristro_combos_id = null;
+        }
+        
+        $newFactura_compra->tbl_producto_id = $producto->id;
+
+        //Registro Facturas - Clientes
+        $newRegistroCompra->tbl_clientes_id = $cliente->id;
+        $newRegistroCompra->factura_compra_id = $newFactura_compra->id; 
+
+        //Registro Facturas - Usuario
+        $newRegistroFactura->factura_compra_id = $newFactura_compra->id;
+        $newRegistroFactura->tbl_usuario_id = $usuario->id;
 
         //Inventario
         $inventario->cantidad = $inventario->cantidad - $request->cantidad;
 
-        //Combo
-            //registrar Combo
-        $registroCombo->nombre = $request->nomrbeCombo;
-        $registroCombo->descripcion = $request->descripcionCombo;
-        $registroCombo->tbl_productos_id = $producto->id;
-        $registroCombo->factura_compra_id = $newFactura_compra->id;
 
-            //Especificar Combo
-        $combo->nombre = $request->nomrbeCombo;
-        $combo->descripcion = $request->descripcionCombo;
-        $combo->cantidad = $request->cantidad;
-        $combo->valor = $producto->precio;
-        $combo->valor_final = $request->valorFinalCombo;
-        $combo->registros_combos_id = $registroCombo->id;
-
-        return response()->json([
-            'Producto' => $producto,
-            'Cliente' => $cliente,
-            'Usuario' => $usuario,
-            'Inventario' => $inventario,
-            'Factura'=> $newFactura_compra,
-            'Registro Compra'=>$newRegistroCompra,  
-            'Descuento' => $descuento[0]->valor
-        ]);
-    }
-
-    // -------- registrar Combo
-    public function registrarCombo(Request $request){
-        $newRegistroCompra = new modelRegistro_compra;
-        $newRegistroFactura = new modelRegistro_factura;
-        $newFactura_compra = new modelFactura_compra;
-        $registroCombo = new modelRegistro_combos;
-        $combo = new modelCombos;
-        
-
-        $producto = modelProducto::findOrFail($request->producto_id);
-        $cliente = modelClient::findOrFail($request->cliente_id);
-        $inventario = modelInventario::findOrfail($producto->id);
-        $usuario = auth()->user();
-        $dateTime = [now()];
-
-        $descuento = modelClient::select('tbl_clientes.*', 'categorias_clientes.*', 'descuento_producto.*')
-        ->join('categorias_clientes', 'categorias_clientes.id', '=', 'tbl_clientes.categorias_clientes_id')
-        ->join('descuento_producto', 'descuento_producto.id', '=', 'categorias_clientes.descuento_producto_id')
-        ->where('tbl_clientes.id', $cliente->id)
+        //Factura Combo
+        $facturaCombo = modelCombos::select('combos.*', 'registro_combos.*', 'tbl_productos.*')
+        ->join('registro_combos', 'registro_combos.combos_id', '=', 'combos.id')
+        ->join('tbl_productos', 'tbl_productos.id', '=', 'registro_combos.tbl_productos_id')
+        ->where('combos.id', $combo->id)
         ->get();
 
+        if($request->tipo_factura != 0){
+
+            return response()->json([
+                'Producto' => $producto,
+                'Cliente' => $cliente,
+                'Usuario' => $usuario,
+                'Inventario' => $inventario,
+                'Factura'=> $newFactura_compra,
+                'Registro Compra'=>$newRegistroCompra,  
+                'Descuento' => $descuento[0]->valor,
+                
+            ]);    
+           
+        } else {
             
+            return response()->json([
+                'combo' => $combo,
+                'Registro de combo' => $registroCombo,
+                'Factura combo' => $facturaCombo
+            ]);
 
-        return response()->json([
-            'Descuento'=> $descuento[0]
-        ]);
+        }
 
-    }
+    } 
+
+    
 }

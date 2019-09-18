@@ -28,21 +28,22 @@ class CreateFacturaCompraTable extends Migration
             $table->integer('precio')->nullable();
             $table->integer('descuento')->nullable();
             $table->integer('precio_final')->nullable();
-            $table->integer('registro_facturas_id');
-            $table->integer('registro_compra_id');
+            $table->date('fecha')->nullable();
+            $table->integer('registro_combos_id');
+            $table->integer('tbl_productos_id');
 
-            $table->index(["registro_facturas_id"], 'fk_registro_facturas_has_registro_compra_registro_facturas1_idx');
+            $table->index(["registro_combos_id"], 'fk_factura_compra_registro_combos1_idx');
 
-            $table->index(["registro_compra_id"], 'fk_registro_facturas_has_registro_compra_registro_compra1_idx');
+            $table->index(["tbl_productos_id"], 'fk_factura_compra_tbl_productos1_idx');
 
 
-            $table->foreign('registro_facturas_id', 'fk_registro_facturas_has_registro_compra_registro_facturas1_idx')
-                ->references('id')->on('registro_facturas')
+            $table->foreign('registro_combos_id', 'fk_factura_compra_registro_combos1_idx')
+                ->references('id')->on('registro_combos')
                 ->onDelete('no action')
                 ->onUpdate('no action');
 
-            $table->foreign('registro_compra_id', 'fk_registro_facturas_has_registro_compra_registro_compra1_idx')
-                ->references('id')->on('registro_compra')
+            $table->foreign('tbl_productos_id', 'fk_factura_compra_tbl_productos1_idx')
+                ->references('id')->on('tbl_productos')
                 ->onDelete('no action')
                 ->onUpdate('no action');
         });

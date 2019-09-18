@@ -9,6 +9,6 @@ class modelRegistro_factura extends Model
     public $timestamps = false;
     protected $table = 'registro_facturas';
     protected $fillable = [
-        'nombre', 'fecha', 'cliente_id', 'usuario_id' 
+        'factura_compra_id', 'tbl_usuario_id' 
     ];
 }

@@ -4,17 +4,17 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRegistroCombosTable extends Migration
+class CreateCombosTable extends Migration
 {
     /**
      * Schema table name to migrate
      * @var string
      */
-    public $tableName = 'registro_combos';
+    public $tableName = 'combos';
 
     /**
      * Run the migrations.
-     * @table registro_combos
+     * @table combos
      *
      * @return void
      */
@@ -26,8 +26,8 @@ class CreateRegistroCombosTable extends Migration
             $table->string('nombre', 45)->nullable();
             $table->text('descripcion')->nullable();
             $table->integer('cantidad')->nullable();
-            $table->integer('valor')->nullable();
-            $table->integer('valor_final')->nullable();
+            $table->integer('precioNormal')->nullable();
+            $table->integer('precioCombo')->nullable();
         });
     }
 

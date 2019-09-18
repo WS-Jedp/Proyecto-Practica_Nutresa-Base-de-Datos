@@ -11,6 +11,6 @@ class modelCombos extends Model
     protected $table = 'combos';
 
     protected $fillable = [
-        'nombre', 'descripcion', 'cantidad', 'valor', 'valor_final'
+        'nombre', 'descripcion', 'cantidad', 'precioNormal', 'precioCombo'
     ];
 }
