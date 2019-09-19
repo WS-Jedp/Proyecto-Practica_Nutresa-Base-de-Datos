@@ -131,7 +131,7 @@ class productoController extends Controller
         $facturaCombo = modelCombos::select('combos.*', 'registro_combos.*', 'tbl_productos.*')
         ->join('registro_combos', 'registro_combos.combos_id', '=', 'combos.id')
         ->join('tbl_productos', 'tbl_productos.id', '=', 'registro_combos.tbl_productos_id')
-        ->where('combos.id', $combo->id)
+        ->where('combos.nombre', $combo->nombre)
         ->get();
 
         if($request->tipo_factura != 0){
@@ -150,7 +150,9 @@ class productoController extends Controller
         } else {
             
             return response()->json([
-                'combo' => $combo,
+                'Mensaje' => 'El combo ' . $combo->nombre . ' se ha registrado correctamente.',
+                'Descripcion' => 'Se ha realizado el combo ' . $combo->nombre . ', el cual describe que ' . $combo->descripcion . '.',
+                'Cantidad' => 'Se ha comprado la cantidad de ' . $combo->cantidad . ' productos.',
                 'Registro de combo' => $registroCombo,
                 'Factura combo' => $facturaCombo
             ]);
