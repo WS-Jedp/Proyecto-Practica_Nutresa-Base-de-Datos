@@ -19,6 +19,6 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        'http://127.0.0.1:8000/iniciarSesion',
+        'http://127.0.0.1:8000/iniciarSesion', 'http://127.0.0.1:8000/validacionToken', 'http://127.0.0.1:8000/crearCategoria', 'http://127.0.0.1:8000/agregarCliente', 'http://127.0.0.1:8000/agregarProducto', 'http://127.0.0.1:8000/comprarProductos', 'registrarCombo'
     ];
 }

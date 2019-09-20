@@ -17,30 +17,23 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-
-//Login
-Route::post('iniciarSesion', 'usuariosController\userController@loginUser');
-
 Route::group(['middleware'=>'jwt.auth'], function(){
 
-    Route::post('validacionToken', 'usuariosController\userController@validateToken');
+        //Todos los clientes
+    Route::get('clientes', 'api\apiController@getClientes');
 
-    // ------- Categorias
-    Route::post('crearCategoria','clientesControllers\categoriasController@crearCategoria');
+        //Toda la informacion de un cliente
+    Route::get('clientes/{id?}  ', 'api\apiController@getCliente');    
 
+    //--------- Productos
+    Route::get('Productos', 'api\apiController@getProductos');
 
-    //Clientes
-        //Crear Clientes
-    Route::post('agregarCliente', 'clientesControllers\clientController@agregarCliente');
+    //Producto Indiviudal
+    Route::get('Productos/{id?}', 'api\apiController@getProducto');
 
-    //Productos
-        //Agregar Productos
-    Route::post('agregarProducto', 'productosControllers\productoController@agregarProducto');
-    
-        //Comprar productos
-    Route::post('comprarProductos', 'productosControllers\productoController@comprarProducto');
-
-        //Registrar Combo
-    Route::post('registrarCombo', 'productosControllers\productoController@registrarCombo');
-
+    //--------- Facturas
+    Route::get('Facturas', 'api\apiController@getFacturas');
+    Route::get('Facturas/{id?}', 'api\apiController@getFactura');
 });
+
+
