@@ -123,5 +123,43 @@ class apiController extends Controller
             ]);
         }
         }
+
+
+        public function getCategorias(){
+            $categorias = modelCategoriesClient::all();
+
+            return response()->json([
+                'mensaje'=> 'Se ha obtenido correctamente las categorias',
+                'status'=>200,
+                'categorias'=>$categorias
+            ]);
+        }
+
+        public function getCategoria($id){
+            $categoria = modelCategoriesClient::select('categorias_clientes.*', 'descuento_producto.*')
+            ->join('descuento_producto', 'descuento_producto.id', 'categorias_clientes.descuento_producto_id')
+            ->where('categorias_clientes.id', $id)
+            ->first();
+
+            return response()->json([
+                'mensaje'=> 'Se ha obtenido correctamente la categoria',
+                'status'=> 200,
+                'categoria'=> $categoria
+            ]);
+        }
+
+        public function clientsCategoria($id){
+
+        $categoria = modelClient::select('tbl_clientes.*', 'categorias_clientes.*')
+        ->join('categorias_clientes', 'categorias_clientes.id', 'tbl_clientes.categorias_clientes_id')
+        ->where('categorias_clientes.id', $id)
+        ->get();
+
+        return response()->json([
+            'mensaje'=>'Se ha obtenido la categoria y sus clientes',
+            'status'=>200,
+            'categorias'=>$categoria
+        ]);
+        }
         
 }

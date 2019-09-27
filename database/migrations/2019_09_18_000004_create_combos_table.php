@@ -25,7 +25,6 @@ class CreateCombosTable extends Migration
             $table->increments('id');
             $table->string('nombre', 45)->nullable();
             $table->text('descripcion')->nullable();
-            $table->integer('cantidad')->nullable();
             $table->integer('precioNormal')->nullable();
             $table->integer('precioCombo')->nullable();
             $table->dateTime('fecha')->nullable();

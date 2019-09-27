@@ -21,7 +21,7 @@ Route::post('iniciarSesion', 'usuariosController\userController@loginUser');
 
 Route::group(['middleware'=>'jwt.auth'], function(){
 
-    Route::post('validacionToken', 'usuariosController\userController@validateToken');
+    Route::get('validacionToken', 'usuariosController\userController@validateToken');
 
     // ------- Categorias
     Route::post('crearCategoria','clientesControllers\categoriasController@crearCategoria');

@@ -25,6 +25,7 @@ class CreateRegistroCombosTable extends Migration
             $table->increments('id');
             $table->integer('tbl_productos_id');
             $table->integer('combos_id');
+            $table->integer('cantidad')->nullable();
 
             $table->index(["combos_id"], 'fk_tbl_productos_has_combos_combos1_idx');
 

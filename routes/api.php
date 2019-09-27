@@ -34,6 +34,11 @@ Route::group(['middleware'=>'jwt.auth'], function(){
     //--------- Facturas
     Route::get('Facturas', 'api\apiController@getFacturas');
     Route::get('Facturas/{id?}', 'api\apiController@getFactura');
+
+    //-------- Categorias
+    route::get('Categorias', 'api\apiController@getCategorias');
+    route::get('Categoria/{id?}', 'api\apiController@getCategoria');
+    route::get('Categorias/{id?}', 'api\apiController@clientsCategoria');
 });
 
 
