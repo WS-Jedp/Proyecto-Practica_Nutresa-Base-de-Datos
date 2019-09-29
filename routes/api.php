@@ -27,6 +27,7 @@ Route::group(['middleware'=>'jwt.auth'], function(){
 
     //--------- Productos
     Route::get('Productos', 'api\apiController@getProductos');
+    Route::get('Compras', 'api\apiController@getCompra');
 
     //Producto Indiviudal
     Route::get('Productos/{id?}', 'api\apiController@getProducto');

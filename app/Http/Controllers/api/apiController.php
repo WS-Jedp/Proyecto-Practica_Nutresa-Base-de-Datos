@@ -82,6 +82,7 @@ class apiController extends Controller
     public function getFacturas(){
         $facturas = modelRegistro_factura::all();
 
+
         return response()->json([
             'mensaje'=>'Se han obtenido todas la facturas correctamente',
             'status'=>200,
@@ -150,8 +151,9 @@ class apiController extends Controller
 
         public function clientsCategoria($id){
 
-        $categoria = modelClient::select('tbl_clientes.*', 'categorias_clientes.*')
-        ->join('categorias_clientes', 'categorias_clientes.id', 'tbl_clientes.categorias_clientes_id')
+        $categoria = modelDescuento_Producto::select('categorias_clientes.*', 'descuento_producto.*', 'tbl_clientes.*')
+        ->join('categorias_clientes', 'categorias_clientes.descuento_producto_id', 'descuento_producto.id')
+        ->join('tbl_clientes', 'tbl_clientes.categorias_clientes_id', 'categorias_clientes.id')
         ->where('categorias_clientes.id', $id)
         ->get();
 
@@ -161,5 +163,19 @@ class apiController extends Controller
             'categorias'=>$categoria
         ]);
         }
+
+
+
+    public function getCompra(){
+        $productos = modelProducto::select('tbl_productos.*', 'inventario.*')
+        ->join('inventario', 'inventario.producto_id', 'tbl_productos.id')
+        ->get();
+
+        return response()->json([
+            'mensaje'=> 'Se han obtenido los productos',
+            'status'=>200,
+            'productos'=>$productos
+        ]);
+    }
         
 }
