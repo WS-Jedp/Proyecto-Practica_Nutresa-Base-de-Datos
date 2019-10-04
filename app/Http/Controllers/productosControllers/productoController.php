@@ -47,7 +47,7 @@ class productoController extends Controller
     //---------------------- Comprar Producto -------------------------------
 
     public function comprarProducto(Request $request){
-        
+    
         $newRegistroCompra = new modelRegistro_cli_fact;
         $newRegistroFactura = new modelRegistro_factura;
         $newFactura_compra = new modelFactura_compra;
